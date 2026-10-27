@@ -655,7 +655,7 @@ class Nxbt():
         :rtype: list
         """
 
-        return (find_devices_by_alias("Nintendo Switch"))
+        return (find_devices_by_alias("Nintendo Switch", "Nintendo Switch 2"))
 
     @property
     def state(self):
@@ -784,7 +784,7 @@ class _ControllerManager():
         })
 
     def remove_controller(self, index):
-        
+
         self._children[index].terminate()
         self.state.pop(index, None)
 

@@ -180,7 +180,7 @@ class ControllerServer():
             duration_end = time.perf_counter()
             duration_elapsed = duration_end - duration_start
             duration_start = duration_end
-            
+
             sleep_time = 1/132 - duration_elapsed
             if sleep_time >= 0:
                 time.sleep(sleep_time)
@@ -305,11 +305,11 @@ class ControllerServer():
         connected_devices = []
         connected_devices_count = {}
         while self._crw_running:
-            paths = self.bt.find_connected_devices(alias_filter="Nintendo Switch")
+            paths = self.bt.find_connected_devices(alias_filters=("Nintendo Switch", "Nintendo Switch 2"))
             # Keep track of Switches that connect
             if len(paths) > 0:
                 connected_devices = list(set(connected_devices + paths))
-            
+
             # Increment a counter if a Switch connected and disconnected
             disconnected = list(set(connected_devices) - set(paths))
             if len(disconnected) > 0:
@@ -319,7 +319,7 @@ class ControllerServer():
                     else:
                         connected_devices_count[path] += 1
                 connected_devices = list(set(connected_devices) - set(disconnected))
-            
+
             # Delete Switches that connect/disconnect twice.
             # This behaviour is characteristic of connection issues and is corrected
             # by removing the Switch's connection to the system.
@@ -432,7 +432,7 @@ class ControllerServer():
                         time.sleep(1)
                     else:
                         time.sleep(1/15)
-                
+
                 break
             except OSError as e:
                 self.logger.debug(e)

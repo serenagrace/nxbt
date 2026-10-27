@@ -106,7 +106,7 @@ def handle_macro(message):
     nxbt.macro(index, macro)
 
 
-def start_web_app(ip='0.0.0.0', port=8000, usessl=False, cert_path=None):
+def start_web_app(ip='127.0.0.0', port=8001, usessl=False, cert_path=None):
     if usessl:
         if cert_path is None:
             # Store certs in the package directory

@@ -21,7 +21,7 @@ parser.add_argument('command', default=False, choices=[
                     macro - Allows for input of a specified macro from the command line
                     (with the argument -s) or from a file (with the argument -f).
                     tui/remote_tui - Opens a TUI that allows for direct input from the keyboard
-                    to the Switch. 
+                    to the Switch.
                     addresses - Lists the Bluetooth MAC addresses for
                     all previously connected Nintendo Switches.
                     test - Runs through a series of tests to ensure NXBT is working and
@@ -51,7 +51,7 @@ parser.add_argument('--usessl', required=False, default=False, action='store_tru
 parser.add_argument('--certpath', required=False, default=None, type=str,
                     help="""Specifies the folder location for SSL certificates used
                     in the webapp. Certificates in this folder should be in the form of
-                    a 'cert.pem' and 'key.pem' pair.""")                
+                    a 'cert.pem' and 'key.pem' pair.""")
 args = parser.parse_args()
 
 
@@ -132,7 +132,7 @@ def check_bluetooth_address(address):
 def get_reconnect_target():
 
     if args.reconnect:
-        reconnect_target = find_devices_by_alias("Nintendo Switch")
+        reconnect_target = find_devices_by_alias("Nintendo Switch", "Nintendo Switch 2")
     elif args.address:
         check_bluetooth_address(args.address)
         reconnect_target = args.address
@@ -300,7 +300,7 @@ def macro():
 
 def list_switch_addresses():
 
-    addresses = find_devices_by_alias("Nintendo Switch")
+    addresses = find_devices_by_alias("Nintendo Switch", "Nintendo Switch 2")
 
     if not addresses or len(addresses) < 1:
         print("No Switches have previously connected to this device.")

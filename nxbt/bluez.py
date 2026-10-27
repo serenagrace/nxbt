@@ -101,7 +101,7 @@ def toggle_clean_bluez(toggle):
     service will not be restarted if the input plugin
     already matches the toggle.
 
-    :param toggle: A boolean element indicating if BlueZ 
+    :param toggle: A boolean element indicating if BlueZ
     should be cleaned (True) or not (False)
     :type toggle: boolean
     :raises PermissionError: If the user is not root
@@ -163,7 +163,7 @@ def clean_sdp_records():
                         "If you can, please install this tool, as " +
                         "it is required for proper functionality.")
 
-    # Enable Read/Write to the SDP server. This is a remedy for a 
+    # Enable Read/Write to the SDP server. This is a remedy for a
     # compatibility mode bug introduced in later versions of BlueZ 5
     _run_command(["chmod", "777", "/var/run/sdp"])
 
@@ -171,7 +171,7 @@ def clean_sdp_records():
     result = _run_command(['sdptool', 'browse', 'local']).stdout.decode('utf-8')
     if result is None or len(result.split('\n\n')) < 1:
         return
-    
+
     # Record all service record handles
     exceptions = ["PnP Information"]
     service_rec_handles = []
@@ -189,7 +189,7 @@ def clean_sdp_records():
         for line in rec.split('\n'):
             if "Service RecHandle" in line:
                 service_rec_handles.append(line.split(" ")[2])
-    
+
     # Delete all found service records
     if len(service_rec_handles) > 0:
         for record_handle in service_rec_handles:
@@ -214,7 +214,7 @@ def _run_command(command):
     cmd_err = result.stderr.decode("utf-8").replace("\n", "")
     if cmd_err != "":
         raise Exception(cmd_err)
-    
+
     return result
 
 
@@ -226,7 +226,7 @@ def get_random_controller_mac():
         hex_number = str(hex(random_number))
         hex_number = hex_number[2:].upper()
         return str(hex_number)
-    
+
     return f"7C:BB:8A:{seg()}:{seg()}:{seg()}"
 
 
@@ -265,7 +265,7 @@ def replace_mac_addresses(adapter_paths, addresses):
         _run_command(['hciconfig', adapter_id, 'reset'])
 
 
-def find_devices_by_alias(alias, return_path=False, created_bus=None):
+def find_devices_by_alias(*aliases, return_path=False, created_bus=None):
     """Finds the Bluetooth addresses of devices
     that have a specified Bluetooth alias. Aliases
     are converted to uppercase before comparison
@@ -301,10 +301,11 @@ def find_devices_by_alias(alias, return_path=False, created_bus=None):
             DEVICE_INTERFACE,
             "Address").upper()
 
-        # Check for an address match
-        if device_alias.upper() == alias.upper():
-            addresses.append(device_addr)
-            matching_paths.append(path)
+        for alias in aliases:
+            # Check for an address match
+            if device_alias.upper() == alias.upper():
+                addresses.append(device_addr)
+                matching_paths.append(path)
 
     # Close the dbus connection if we created one
     if created_bus is None:
@@ -316,7 +317,7 @@ def find_devices_by_alias(alias, return_path=False, created_bus=None):
         return addresses
 
 
-def disconnect_devices_by_alias(alias, created_bus=None):
+def disconnect_devices_by_alias(*aliases, created_bus=None):
     """Disconnects all devices matching an alias.
 
     :param alias: The device's alias
@@ -345,14 +346,15 @@ def disconnect_devices_by_alias(alias, created_bus=None):
             "Alias").upper()
 
         # Check for an alias match
-        if device_alias.upper() == alias.upper():
-            device = dbus.Interface(
-                bus.get_object(SERVICE_NAME, path),
-                DEVICE_INTERFACE)
-            try:
-                device.Disconnect()
-            except Exception as e:
-                print(e)
+        for alias in aliases:
+            if device_alias.upper() == alias.upper():
+                device = dbus.Interface(
+                    bus.get_object(SERVICE_NAME, path),
+                    DEVICE_INTERFACE)
+                try:
+                    device.Disconnect()
+                except Exception as e:
+                    print(e)
 
     # Close the dbus connection if we created one
     if created_bus is None:
@@ -419,7 +421,7 @@ class BlueZ():
         For changes to apply, the Bluetooth interface needs to be
         restarted.
 
-        :param mac: A Bluetooth MAC address in 
+        :param mac: A Bluetooth MAC address in
         the form of "XX:XX:XX:XX:XX:XX
         :type mac: str
         :raises PermissionError: On run as non-root user
@@ -882,8 +884,8 @@ class BlueZ():
             return path
 
         return None
-    
-    def find_connected_devices(self, alias_filter=False):
+
+    def find_connected_devices(self, alias_filters=None):
         """Finds the D-Bus path to a device that contains the
         specified address.
 
@@ -911,8 +913,10 @@ class BlueZ():
                 "Alias").upper()
 
             if device_conn_status:
-                if alias_filter and device_alias == alias_filter.upper():
-                    conn_devices.append(path)
+                if alias_filters is not None:
+                    for alias in alias_filters:
+                        if device_alias == alias.upper():
+                            conn_devices.append(path)
                 else:
                     conn_devices.append(path)
 
